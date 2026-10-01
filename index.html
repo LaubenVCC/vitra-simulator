@@ -6,6 +6,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Simulador de resiliencia operacional: blast radius IT/OT, IRED y exposición financiera. Organización demo ficticia.">
 <title>VITRA CommandCentral · Simulador v3.0</title>
 <style>
   :root{--bg:#f4f6f8;--card:#fff;--border:#e2e6ea;--ink:#22272b;--muted:#6b7480;
@@ -95,44 +96,76 @@
   #modal pre{padding:16px;overflow:auto;white-space:pre-wrap;font-size:11.5px;line-height:1.55;font-family:ui-monospace,Consolas,monospace;}
   footer{margin-top:24px;text-align:center;color:var(--muted);font-size:12px;} footer b{color:var(--bl);}
   @media(max-width:1000px){.grid4,.grid3{grid-template-columns:1fr 1fr;}.gridmid{grid-template-columns:1fr;}.sidebar{display:none;}}
+
+  /* ===== A11y / semántica (parche) ===== */
+  :root{--muted:#56606b;--or:#b45309;--grn:#1d7a43;--red:#b02a2a;--teal:#0f6f80;}
+  .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+  .skip{position:absolute;left:8px;top:-60px;background:#fff;padding:8px 12px;z-index:100;border-radius:4px;}
+  .skip:focus{top:8px;}
+  :focus-visible{outline:3px solid var(--bl);outline-offset:2px;}
+  .sidebar .g{color:#aab3bb;}
+  .navbtn{all:unset;box-sizing:border-box;display:flex;gap:10px;width:100%;padding:10px 18px;font-size:13.5px;cursor:pointer;color:var(--sideink);}
+  .navbtn:hover{background:#343b43;}
+  .navbtn.on{background:#3a4149;color:#fff;box-shadow:inset 3px 0 0 var(--or);}
+  .navbtn:focus-visible{outline:3px solid #fff;outline-offset:-3px;}
+  button.sw{border:0;padding:0;display:block;}
+  button.chip{font:inherit;cursor:pointer;}
+  .node:focus{outline:none;}
+  .node:focus-visible rect,.node:focus-visible circle{stroke:#0b3d91;stroke-width:5;}
+  .nsub,.elabel{font-size:10px;}
+  .budget th{background:none;font-weight:400;text-align:left;padding:5px 0;font-size:11.5px;color:var(--ink);}
+  .budget tr.tot th{font-weight:700;border-top:1px solid #dfe3e7;padding-top:7px;}
+  .b-mal{background:#a84b00;}.b-ph{background:#0f6f80;}.b-t2{background:#165bb3;}.b-t3{background:#56606b;}
+  .tablewrap{overflow-x:auto;}
+  @media(max-width:1000px){
+    .app{flex-direction:column;}
+    .sidebar{display:flex;width:auto;height:auto;position:static;flex:none;padding:0;overflow-x:auto;}
+    .sidebar .g{display:none;}
+    .navbtn{width:auto;white-space:nowrap;}
+  }
+  @media(prefers-reduced-motion:reduce){.dot{animation:none;}.sw,.sw:after{transition:none;}}
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Saltar al contenido</a>
+<p id="srStatus" class="sr-only" role="status"></p>
 <div class="app">
-  <nav class="sidebar">
-    <a class="on" data-go="top">◆ Overview</a>
+  <nav class="sidebar" aria-label="Secciones del simulador">
+    <button type="button" class="navbtn on" data-go="top" aria-current="true"><span aria-hidden="true">◆</span> Overview</button>
     <div class="g">ESTRUCTURAL</div>
-    <a data-go="kpi">◎ IRED &amp; Financiero</a>
-    <a data-go="graph">⬡ Topology Graph</a>
-    <a data-go="reins">⚙ Refuerzos / What-if</a>
+    <button type="button" class="navbtn" data-go="kpi"><span aria-hidden="true">◎</span> IRED &amp; Financiero</button>
+    <button type="button" class="navbtn" data-go="graph"><span aria-hidden="true">⬡</span> Topology Graph</button>
+    <button type="button" class="navbtn" data-go="reins"><span aria-hidden="true">⚙</span> Refuerzos / What-if</button>
     <div class="g">DETECCIÓN</div>
-    <a data-go="lumu">▲ Lumu Defender (NDR)</a>
+    <button type="button" class="navbtn" data-go="lumu"><span aria-hidden="true">▲</span> Lumu Defender (NDR)</button>
     <div class="g">GOBERNANZA (persistente)</div>
-    <a data-go="shadow">✦ Shadow AI</a>
-    <a data-go="ctem">▤ CTEM Zafran</a>
+    <button type="button" class="navbtn" data-go="shadow"><span aria-hidden="true">✦</span> Shadow AI</button>
+    <button type="button" class="navbtn" data-go="ctem"><span aria-hidden="true">▤</span> CTEM Zafran</button>
     <div class="g">SALIDAS</div>
-    <a data-go="rep">▦ Eventos / Auditoría</a>
+    <button type="button" class="navbtn" data-go="rep"><span aria-hidden="true">▦</span> Eventos / Auditoría</button>
   </nav>
 
   <div class="main" id="top">
-    <div class="topbar">
-      <div class="logo">
-        <svg width="24" height="28" viewBox="0 0 26 30"><path d="M13 1 25 5v9c0 8-5.4 12.6-12 15C6.4 26.6 1 22 1 14V5z" fill="none" stroke="#1e6fd6" stroke-width="2.4"/><path d="M8 13l3.4 4L18 9" fill="none" stroke="#1e6fd6" stroke-width="2.4"/></svg>
+    <header class="topbar">
+      <h1 class="logo">
+        <svg width="24" height="28" viewBox="0 0 26 30" aria-hidden="true" focusable="false"><path d="M13 1 25 5v9c0 8-5.4 12.6-12 15C6.4 26.6 1 22 1 14V5z" fill="none" stroke="#1e6fd6" stroke-width="2.4"/><path d="M8 13l3.4 4L18 9" fill="none" stroke="#1e6fd6" stroke-width="2.4"/></svg>
         VITRA <span class="sep">|</span> <span class="sub">CommandCentral · Simulador v3.0</span>
-      </div>
+      </h1>
       <div class="tenant"><b>NOVARIA PHARMA S.A.S.</b> organización demo ficticia · piloto read-only</div>
-    </div>
-    <div class="chips">
+    </header>
+    <main id="main" tabindex="-1">
+    <h2 class="sr-only">Simulación de incidente</h2>
+    <div class="chips" role="group" aria-label="Estado del sistema">
       <div class="chip"><span class="dot"></span> Telemetry: <b>LIVE</b></div>
       <div class="chip">Coverage: <b>92%</b></div>
       <div class="chip">Confianza Lumu: <b id="lumuChipVal">--</b></div>
       <div class="chip">Engine: <b>v1.0</b></div>
       <div class="chip">Base: <b>Facturas reales + P&amp;L</b></div>
-      <div class="chip" style="cursor:pointer;" id="pvChip"><b>Vista:</b> pública (brand-agnostic)</div>
+      <button type="button" class="chip" id="pvChip" aria-pressed="false"><b>Vista:</b> pública (brand-agnostic)</button>
     </div>
 
     <div class="hint" style="margin-bottom:6px;">Elige un incidente activo. Cada uno fija un Nodo Cero distinto y recalcula todo abajo en vivo.</div>
-    <div class="scenbar" id="scenbar">
+    <div class="scenbar" id="scenbar" role="group" aria-label="Escenarios de incidente">
       <button class="sbtn on" data-scen="A">A · DNS Tunneling en SCADA (OT)</button>
       <button class="sbtn" data-scen="B">B · Anonymized Login (Identidad)</button>
       <button class="sbtn" data-scen="C">C · Log Tampering (pérdida de visibilidad)</button>
@@ -141,7 +174,7 @@
     <div class="scenhint" id="scenName"></div>
 
     <div class="hint" style="margin:10px 0 4px;">Prioriza la lectura para tu rol — no oculta nada, solo cambia el énfasis y el lenguaje de las explicaciones.</div>
-    <div class="scenbar" id="rolebar" style="margin-bottom:4px;">
+    <div class="scenbar" id="rolebar" style="margin-bottom:4px;" role="group" aria-label="Lectura por rol">
       <button class="sbtn" data-role="ciso">Ver como CISO</button>
       <button class="sbtn" data-role="cto">Ver como CTO</button>
       <button class="sbtn" data-role="cfo">Ver como CFO</button>
@@ -156,7 +189,7 @@
     <div class="grid4" id="kpi">
       <div class="card" id="cardIred" style="text-align:center;">
         <h3>IRED</h3>
-        <div class="gauge"><svg viewBox="0 0 120 74">
+        <div class="gauge" id="gauge" role="img" aria-label="IRED"><svg viewBox="0 0 120 74" aria-hidden="true" focusable="false">
           <path d="M10 70 A50 50 0 0 1 110 70" fill="none" stroke="#e6e9ed" stroke-width="10" stroke-linecap="round"/>
           <path id="gaugeArc" d="M10 70 A50 50 0 0 1 110 70" fill="none" stroke="#e8a13c" stroke-width="10" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="72"/>
         </svg><div class="val" id="iredVal" style="color:#b06f10;">--</div></div>
@@ -172,12 +205,12 @@
 
     <div class="gridmid" id="graph">
       <div class="card">
-        <h3>Topology Graph — Blast Radius</h3>
+        <h3 id="graphTitle">Topology Graph — Blast Radius</h3>
         <div class="hint">Toca o pasa el mouse sobre un nodo para ver su detalle financiero.</div>
         <details class="techdetail"><summary>Detalle técnico del motor</summary>
           <div class="hint">θ = 0.01 · profundidad ≤ 6 · propagación max-product sobre el grafo de blast radius.</div>
         </details>
-        <div id="graphWrap"><svg id="graphSvg" viewBox="0 0 900 520"></svg><div id="tooltip"></div></div>
+        <div id="graphWrap"><svg id="graphSvg" viewBox="0 0 900 520" role="group" aria-labelledby="graphTitle"></svg><div id="tooltip" role="tooltip"></div></div>
       </div>
       <div class="card" id="verdict">
         <h3>Structural Verdict</h3>
@@ -185,7 +218,7 @@
         <div class="hint" style="margin:8px 0 3px;">TOP CRITICAL PATH</div>
         <div class="path" id="vPath">--</div>
         <div class="hint" id="detailLabel" style="margin:10px 0 2px;">DETALLE DEL ACTIVO — toca un nodo del grafo (por defecto: el más expuesto)</div>
-        <div id="nodeDetail"></div>
+        <div id="nodeDetail" aria-live="polite"></div>
         <button class="btn" id="btnDict">Generar dictamen (VSE-3)</button>
         <div class="hint" style="margin-top:9px;">El motor recomienda; nunca actúa por sí mismo — toda contención requiere aprobación humana.</div>
       </div>
@@ -202,13 +235,13 @@
           <div class="hint" style="margin-top:8px;">Cada señal es evidencia de red/comportamiento independiente, correlacionada por Lumu antes de fijar el origen.</div>
         </div>
         <div>
-          <table><tr><th>Señal Lumu</th><th>Evidencia</th><th>Confianza</th></tr><tbody id="lumuEvBody"></tbody></table>
+          <table aria-label="Señales de Lumu"><thead><tr><th scope="col">Señal Lumu</th><th scope="col">Evidencia</th><th scope="col">Confianza</th></tr></thead><tbody id="lumuEvBody"></tbody></table>
         </div>
       </div>
 
       <div class="hint" style="margin:14px 0 4px;font-weight:600;color:var(--ink);">Lumu Autopilot — contención automática ya aplicada</div>
       <div class="hint">Este incidente ya refleja a Autopilot actuando (así opera en producción). El switch no "lo enciende": quita su efecto para dimensionar el riesgo estructural completo, sin ningún control automático — útil para junta directiva o para una aseguradora.</div>
-      <div class="ritem"><div class="sw" id="swAP"></div><span><b>Ver exposición inherente</b> — sin Autopilot ni refuerzos actuando</span></div>
+      <div class="ritem"><button type="button" class="sw" id="swAP" role="switch" aria-checked="false" aria-labelledby="lAP"></button><span id="lAP"><b>Ver exposición inherente</b> — sin Autopilot ni refuerzos actuando</span></div>
       <div class="grid3" style="margin:8px 0 0;">
         <div><div class="hint">Contención ya aplicada por Autopilot</div><div class="big" style="font-size:20px;" id="apRate">--</div></div>
         <div><div class="hint">Exposición ya evitada</div><div class="big" style="font-size:20px;color:var(--grn);" id="apSaved">--</div></div>
@@ -217,7 +250,7 @@
       <div class="hint" id="apNote" style="margin-top:8px;"></div>
 
       <div class="hint" style="margin:14px 0 4px;font-weight:600;color:var(--ink);">Lumu (NDR) vs Zafran (CTEM) — qué hace cada uno</div>
-      <table><tr><th>Capacidad</th><th>Lumu Defender</th><th>Zafran</th></tr>
+      <table aria-label="Comparación Lumu y Zafran"><thead><tr><th scope="col">Capacidad</th><th scope="col">Lumu Defender</th><th scope="col">Zafran</th></tr></thead>
         <tr><td>Detecta compromiso activo en tiempo real</td><td><span class="badge" style="background:var(--grn);">Sí — tráfico y comportamiento</span></td><td><span class="badge" style="background:#454c53;">No aplica</span></td></tr>
         <tr><td>Fija el Nodo Cero del motor estructural</td><td><span class="badge" style="background:var(--grn);">Sí, único insumo aceptado</span></td><td><span class="badge" style="background:#454c53;">No aplica</span></td></tr>
         <tr><td>Filtra ruido de vulnerabilidades no explotables</td><td><span class="badge" style="background:#454c53;">No es su función</span></td><td><span class="badge" style="background:var(--grn);">Sí</span></td></tr>
@@ -229,7 +262,7 @@
     <div class="card" id="vendors">
       <h3>Fabricantes homologados por capa de Nodo Cero</h3>
       <div class="hint">Vitra no depende de una sola marca: acepta evidencia de compromiso confirmado de cualquier fabricante homologado dentro de la capa correspondiente. Lumu es el ancla de la alianza; los demás son alternativas equivalentes según el mercado o el stack del cliente. La fila resaltada es la capa que confirmó el Nodo Cero del incidente activo.</div>
-      <table><tr><th>Capa de evidencia</th><th>Rol en el motor</th><th>Fabricante ancla (alianza)</th><th>Homologados alternativos</th></tr>
+      <table aria-label="Fabricantes homologados por capa"><thead><tr><th scope="col">Capa de evidencia</th><th scope="col">Rol en el motor</th><th scope="col">Fabricante ancla (alianza)</th><th scope="col">Homologados alternativos</th></tr></thead>
         <tbody id="vendorBody"></tbody></table>
     </div>
 
@@ -251,10 +284,11 @@
       <div id="reinsList"></div>
     </div>
 
+    <h2 class="sr-only">Gobernanza y evidencia</h2>
     <div class="card" id="shadow" style="margin-top:12px;">
       <h3>Shadow AI Gateway <span class="hint">(panel de gobierno, persiste entre incidentes)</span></h3>
-      <div class="ritem"><div class="sw" id="swGW"></div><span><b>Política enforce</b> — sanitizar/bloquear flujos de IA no aprobados</span></div>
-      <table><tr><th>Origen</th><th>Clase de dato</th><th>Destino</th><th>Aprobado</th><th>Acción del gateway</th><th>Exposición si escala</th></tr>
+      <div class="ritem"><button type="button" class="sw" id="swGW" role="switch" aria-checked="false" aria-labelledby="lGW"></button><span id="lGW"><b>Política enforce</b> — sanitizar/bloquear flujos de IA no aprobados</span></div>
+      <table aria-label="Flujos de Shadow AI"><thead><tr><th scope="col">Origen</th><th scope="col">Clase de dato</th><th scope="col">Destino</th><th scope="col">Aprobado</th><th scope="col">Acción del gateway</th><th scope="col">Exposición si escala</th></tr></thead>
       <tbody id="shBody"></tbody></table>
       <div class="hint" style="margin-top:8px;">Exposición = f(v) del activo origen × factor de gobierno × peso de clase de dato × MTTR — misma fórmula que el motor estructural.</div>
       <div class="hint">Cierre de ciclo: cada fila no aprobada cuyo origen participe en el incidente activo ya aparece como nodo punteado morado en el grafo de abajo, y su probabilidad se propaga al IRED real — no es una estimación aparte.</div>
@@ -262,36 +296,37 @@
 
     <div class="card" id="ctem" style="margin-top:12px;">
       <h3>Capa CTEM (Zafran) <span class="hint">— filtro de explotabilidad, persiste entre incidentes</span></h3>
-      <div class="ritem"><div class="sw on" id="swZa"></div><span><b>Filtro Zafran activo</b> — solo lo realmente explotable alimenta la fatiga estructural</span></div>
-      <table><tr><th>CVE</th><th>Activo</th><th>Severidad</th><th>Control compensatorio</th><th>Veredicto Zafran</th></tr>
+      <div class="ritem"><button type="button" class="sw on" id="swZa" role="switch" aria-checked="true" aria-labelledby="lZa"></button><span id="lZa"><b>Filtro Zafran activo</b> — solo lo realmente explotable alimenta la fatiga estructural</span></div>
+      <table aria-label="Vulnerabilidades y veredicto CTEM"><thead><tr><th scope="col">CVE</th><th scope="col">Activo</th><th scope="col">Severidad</th><th scope="col">Control compensatorio</th><th scope="col">Veredicto Zafran</th></tr></thead>
       <tbody id="cveBody"></tbody></table>
     </div>
 
     <div class="card" id="rep" style="margin-top:12px;">
       <h3>Operación y evidencia</h3>
-      <div class="tabs">
-        <button class="on" data-tab="events">Eventos en vivo</button>
-        <button data-tab="inc">Incidents</button>
-        <button data-tab="mitre">MITRE ATT&amp;CK</button>
-        <button data-tab="audit">Audit-log</button>
+      <div class="tabs" role="tablist" aria-label="Operación y evidencia">
+        <button type="button" role="tab" id="tabb-events" aria-controls="tab-events" class="on" data-tab="events">Eventos en vivo</button>
+        <button type="button" role="tab" id="tabb-inc" aria-controls="tab-inc" data-tab="inc">Incidents</button>
+        <button type="button" role="tab" id="tabb-mitre" aria-controls="tab-mitre" data-tab="mitre">MITRE ATT&amp;CK</button>
+        <button type="button" role="tab" id="tabb-audit" aria-controls="tab-audit" data-tab="audit">Audit-log</button>
       </div>
-      <div id="tab-events"><div id="evList"></div></div>
-      <div id="tab-inc" style="display:none;"><table id="incTable"></table></div>
-      <div id="tab-mitre" style="display:none;"><table id="mitreTable"></table></div>
-      <div id="tab-audit" style="display:none;"><div id="auditList" class="mono"></div></div>
+      <div id="tab-events" role="tabpanel" aria-labelledby="tabb-events"><div id="evList" role="log" aria-label="Eventos en vivo"></div></div>
+      <div id="tab-inc" role="tabpanel" aria-labelledby="tabb-inc" style="display:none;"><table id="incTable" aria-label="Incidentes del escenario activo"></table></div>
+      <div id="tab-mitre" role="tabpanel" aria-labelledby="tabb-mitre" style="display:none;"><table id="mitreTable" aria-label="Técnicas MITRE ATT&amp;CK"></table></div>
+      <div id="tab-audit" role="tabpanel" aria-labelledby="tabb-audit" style="display:none;"><div id="auditList" class="mono"></div></div>
     </div>
 
+    </main>
     <footer><b>Believe. Create. Connect.</b> · Vitra CommandCentral · cálculo en vivo según Spec v1.0 + base presupuestal real · simulación con organización ficticia</footer>
   </div>
 </div>
 
-<div id="modal"><div class="box">
-  <div class="hd"><b>DICTAMEN DE RESILIENCIA OPERACIONAL (simulación)</b>
+<div id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="box">
+  <div class="hd"><b id="modalTitle">DICTAMEN DE RESILIENCIA OPERACIONAL (simulación)</b>
     <span style="margin-left:auto;display:flex;gap:8px;">
       <button class="btn ghost" id="btnCopy" style="margin:0;">Copiar</button>
       <button class="btn ghost" id="btnClose" style="margin:0;">Cerrar</button>
     </span></div>
-  <pre id="modalPre"></pre>
+  <pre id="modalPre" tabindex="0"></pre>
 </div></div>
 
 <script>
@@ -497,6 +532,23 @@ function execSummaryPlain(s,g,v,o){
 }
 function byId(i){return document.getElementById(i);}
 function sc(){return SCEN[state.scen];}
+var REDUCE=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+function syncA11y(){
+  Array.prototype.forEach.call(document.querySelectorAll(".sw[role=switch]"),function(s){s.setAttribute("aria-checked",String(s.classList.contains("on")));});
+  Array.prototype.forEach.call(document.querySelectorAll(".sbtn"),function(b){b.setAttribute("aria-pressed",String(b.classList.contains("on")));});
+  Array.prototype.forEach.call(document.querySelectorAll(".tabs button"),function(b){b.setAttribute("aria-selected",String(b.classList.contains("on")));});
+  byId("pvChip").setAttribute("aria-pressed",String(state.partner));
+}
+var lastFocus=null;
+function showModal(){lastFocus=document.activeElement;byId("modal").style.display='flex';byId("btnClose").focus();}
+function hideModal(){byId("modal").style.display="none";if(lastFocus&&lastFocus.focus)lastFocus.focus();}
+document.addEventListener("keydown",function(e){
+  var m=byId("modal");if(m.style.display!=="flex")return;
+  if(e.key==="Escape"){hideModal();return;}
+  if(e.key==="Tab"){var f=m.querySelectorAll("button,pre[tabindex]"),a=f[0],z=f[f.length-1];
+    if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus();}
+    else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus();}}
+});
 
 /* ============ MOTOR ============ */
 function buildGraph(s,st){
@@ -636,13 +688,13 @@ function renderEvents(){
   el.innerHTML=h||'<div class="hint">Esperando telemetría…</div>';
 }
 function renderTables(){
-  var s=sc(),h='<tr><th>Activo / hallazgo</th><th>Tipo</th><th>Zona</th></tr>';
+  var s=sc(),h='<thead><tr><th scope="col">Activo / hallazgo</th><th scope="col">Tipo</th><th scope="col">Zona</th></tr></thead>';
   s.inc.forEach(function(r){
     var bc=r[2]==="C2C"?"b-c2":(r[2]==="Malware"?"b-mal":(r[2]==="Phishing"?"b-ph":"b-sp"));
     h+='<tr class="hot"><td><b>'+r[0]+'</b><br><span class="badge '+bc+'">'+r[2]+'</span></td><td>'+r[1]+'</td><td>'+r[3]+'</td></tr>';
   });
   byId("incTable").innerHTML=h;
-  h='<tr><th>ID</th><th>Tactic</th><th>Technique</th></tr>';
+  h='<thead><tr><th scope="col">ID</th><th scope="col">Tactic</th><th scope="col">Technique</th></tr></thead>';
   s.mitre.forEach(function(r){h+='<tr><td style="color:var(--or);font-weight:600;">'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>';});
   byId("mitreTable").innerHTML=h;
 }
@@ -653,6 +705,7 @@ function shieldPath(x,y,w,hh){
    " C "+(x+w*0.28)+" "+(y+hh*0.93)+" "+x+" "+(y+hh*0.85)+" "+x+" "+(y+hh*0.60)+
    " L "+x+" "+(y+hh*0.16)+" Z";
 }
+function nodeLbl(n,id){return id+", "+n.type+", zona "+n.zone+(n.comp?", Nodo Cero comprometido":"")+(n.shadow?", Shadow AI no autorizado":"");}
 function renderGraph(g,v){
   var s=sc(),sp=s.pos,h="";
   function pos(id){ return (g.nodes[id]&&g.nodes[id].pos)?g.nodes[id].pos:sp[id]; }
@@ -668,12 +721,12 @@ function renderGraph(g,v){
     var n=g.nodes[id],c=pos(id),sel=(state.selectedNode===id);
     var autoTag=(!state.rawView && n.autoRes && !n.comp);
     if(n.comp){
-      h+='<g data-id="'+id+'" style="cursor:pointer"><circle cx="'+c[0]+'" cy="'+c[1]+'" r="26" fill="#e04f4f" stroke="'+(sel?"#20262c":"none")+'" stroke-width="3"><animate attributeName="r" values="24;29;24" dur="1.6s" repeatCount="indefinite"/></circle>';
+      h+='<g data-id="'+id+'" class="node" tabindex="0" role="button" aria-pressed="'+sel+'" aria-label="'+nodeLbl(n,id)+'"><circle cx="'+c[0]+'" cy="'+c[1]+'" r="26" fill="#e04f4f" stroke="'+(sel?"#20262c":"none")+'" stroke-width="3">'+(REDUCE?'':'<animate attributeName="r" values="24;29;24" dur="1.6s" repeatCount="indefinite"/>')+'</circle>';
     }else{
       var fill=n.shadow?"#efe6ff":(autoTag?"#e9f7ee":(n.zone.indexOf("OT")===0?"#eaf4ff":(n.type==="llm_external"?"#efe6ff":"#dceafe")));
       var stk=sel?"#20262c":(n.shadow?"#6d28d9":(autoTag?"#2e9e5b":(n.zone.indexOf("OT")===0?"#1e6fd6":(n.type==="llm_external"?"#6d28d9":"#1e6fd6"))));
       var sw2=n.shadow?' stroke-dasharray="3 2"':'';
-      h+='<g data-id="'+id+'" style="cursor:pointer"><rect x="'+(c[0]-24)+'" y="'+(c[1]-24)+'" width="48" height="48" rx="6" fill="'+fill+'" stroke="'+stk+'" stroke-width="'+(sel?3:2)+'"'+sw2+'/>';
+      h+='<g data-id="'+id+'" class="node" tabindex="0" role="button" aria-pressed="'+sel+'" aria-label="'+nodeLbl(n,id)+'"><rect x="'+(c[0]-24)+'" y="'+(c[1]-24)+'" width="48" height="48" rx="6" fill="'+fill+'" stroke="'+stk+'" stroke-width="'+(sel?3:2)+'"'+sw2+'/>';
     }
     h+='<text class="nlabel" x="'+c[0]+'" y="'+(c[1]+40)+'" text-anchor="middle">'+id+'</text>';
     h+='<text class="nsub" x="'+c[0]+'" y="'+(c[1]+52)+'" text-anchor="middle">'+(n.shadow?"SHADOW AI · no autorizado":(n.zone+(n.comp?" · COMPROMISED":(autoTag?" · AUTO-CONTENIDO":""))))+'</text></g>';
@@ -696,7 +749,10 @@ function bindGraphInteraction(g,v){
       tip.innerHTML="<b>"+id+"</b> · "+n.type+" · "+n.zone+"<br>f(v) $"+n.cost.toFixed(2)+"/h · MTTR "+n.mttr+"h · P(alcance) "+pv.toFixed(3)+"<br>toca el nodo para fijar el detalle abajo";
     });
     gr.addEventListener("mouseleave",function(){tip.style.display="none";});
-    gr.addEventListener("click",function(){ state.selectedNode=id; renderGraph(g,v); renderNodeDetail(g,v); });
+    gr.addEventListener("blur",function(){tip.style.display="none";});
+    gr.addEventListener("focus",function(){var b=gr.getBoundingClientRect();gr.dispatchEvent(new MouseEvent("mousemove",{clientX:b.right,clientY:b.top}));});
+    gr.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();gr.dispatchEvent(new MouseEvent("click"));}else if(e.key==="Escape"){tip.style.display="none";}});
+    gr.addEventListener("click",function(){ state.selectedNode=id; renderGraph(g,v); renderNodeDetail(g,v); var again=byId("graphSvg").querySelector('g[data-id="'+id+'"]'); if(again)again.focus(); });
   });
 }
 function tierBadge(t){
@@ -711,14 +767,14 @@ function renderNodeDetail(g,v){
   var n=g.nodes[id], p=n.comp?1:(v.reach[id]||0);
   var h='<div class="row"><span><b>'+id+'</b> · '+n.type+' · '+n.zone+(n.comp?' · <span style="color:var(--red);font-weight:700;">NODO CERO</span>':'')+'</span>'+tierBadge(n.tier)+'</div>';
   h+='<div class="hint">Fuente del dato: '+n.src+' · P(alcance) '+p.toFixed(3)+' · criticidad '+n.crit.toFixed(2)+'</div>';
-  h+='<table class="budget">'+
-     '<tr><td>Depreciación / cloud</td><td style="text-align:right;">$'+n.fv.dep.toFixed(2)+'/h</td></tr>'+
-     '<tr><td>Costo operativo</td><td style="text-align:right;">$'+n.fv.op.toFixed(2)+'/h</td></tr>'+
-     '<tr><td>Regulatorio / contractual</td><td style="text-align:right;">$'+n.fv.reg.toFixed(2)+'/h</td></tr>'+
-     '<tr><td>Forense / recuperación</td><td style="text-align:right;">$'+n.fv.fo.toFixed(2)+'/h</td></tr>'+
-     '<tr class="tot"><td>f(v) total</td><td style="text-align:right;">$'+n.cost.toFixed(2)+'/h</td></tr>'+
-     '<tr><td>MTTR probado</td><td style="text-align:right;">'+n.mttr+' h</td></tr>'+
-     (n.comp?'':'<tr><td>Exposición de este activo</td><td style="text-align:right;">'+money(n.cost*p*n.mttr)+'</td></tr>')+
+  h+='<table class="budget" aria-label="Desglose presupuestal del activo">'+
+     '<tr><th scope="row">Depreciación / cloud</th><td style="text-align:right;">$'+n.fv.dep.toFixed(2)+'/h</td></tr>'+
+     '<tr><th scope="row">Costo operativo</th><td style="text-align:right;">$'+n.fv.op.toFixed(2)+'/h</td></tr>'+
+     '<tr><th scope="row">Regulatorio / contractual</th><td style="text-align:right;">$'+n.fv.reg.toFixed(2)+'/h</td></tr>'+
+     '<tr><th scope="row">Forense / recuperación</th><td style="text-align:right;">$'+n.fv.fo.toFixed(2)+'/h</td></tr>'+
+     '<tr class="tot"><th scope="row">f(v) total</th><td style="text-align:right;">$'+n.cost.toFixed(2)+'/h</td></tr>'+
+     '<tr><th scope="row">MTTR probado</th><td style="text-align:right;">'+n.mttr+' h</td></tr>'+
+     (n.comp?'':'<tr><th scope="row">Exposición de este activo</th><td style="text-align:right;">'+money(n.cost*p*n.mttr)+'</td></tr>')+
      '</table>';
   el.innerHTML=h;
 }
@@ -727,7 +783,7 @@ function renderReins(rank){
   s.reins.forEach(function(r){
     var id=r[0],on=!!state.reins[id];
     var info=null;rank.list.forEach(function(x){if(x.id===id)info=x;});
-    h+='<div class="ritem"><div class="sw'+(on?" on":"")+'" data-rein="'+id+'"></div>'+
+    h+='<div class="ritem"><button type="button" role="switch" aria-checked="'+on+'" aria-label="'+r[1]+'" class="sw'+(on?" on":"")+'" data-rein="'+id+'"></button>'+
        '<span><b>'+r[1]+'</b>'+(r[3]>0?' <span class="hint">k='+r[3]+'</span>':' <span class="hint">restaura verificabilidad</span>')+'</span>'+
        (state.partner?'<span class="ptag">'+r[2]+'</span>':'')+
        (info&&info.delta>0?'<span class="delta">−'+info.pct+'% exp · IRED '+info.ired+'</span>':'<span class="delta"></span>')+'</div>';
@@ -739,6 +795,7 @@ function renderReins(rank){
       state.reins[id]=!state.reins[id];
       auditAppend({op:"refuerzo",scen:state.scen,ired:state.lastV?state.lastV.ired:0,exp:state.lastV?state.lastV.exp:0,refs:[id]});
       paint();
+      var again=document.querySelector('[data-rein="'+id+'"]');if(again)again.focus();
     });
   });
 }
@@ -836,6 +893,9 @@ function paint(){
   renderLumu(o);
   renderVendors(s);
   applyRoleFocus();
+  byId("gauge").setAttribute("aria-label","IRED "+v.ired.toFixed(1)+" de 100, "+v.band);
+  byId("srStatus").textContent="IRED "+v.ired.toFixed(1)+", "+v.band+". Exposición "+money(v.exp)+".";
+  syncA11y();
 }
 
 /* ============ STREAM DE EVENTOS ============ */
@@ -861,7 +921,7 @@ function startStream(){
 /* ============ DICTAMEN ============ */
 function openDictamen(){
   var s=sc(),v=state.lastV,g=state.lastG,rank=state.lastRank;
-  if(!v){byId("modalPre").textContent="Genere primero un incidente.";byId("modal").style.display="flex";return;}
+  if(!v){byId("modalPre").textContent="Genere primero un incidente.";showModal();return;}
   var o=originsOf(g);
   var last=state.audit.length?state.audit[state.audit.length-1]:{hash:"GENESIS"};
   var did=(state.selectedNode&&g.nodes[state.selectedNode])?state.selectedNode:(v.rows[0]?v.rows[0].id:null);
@@ -900,7 +960,7 @@ function openDictamen(){
   L.push("> Disclaimer: cálculo probabilístico sobre telemetría declarada y facturas reales. Vitra opera read-only: recomienda, nunca actúa. Toda contención requiere aprobación expresa del cliente.");
   L.push("Verificación pública: registry.vitra.io/vse/VSE3-0001");
   byId("modalPre").textContent=L.join("\n");
-  byId("modal").style.display="flex";
+  showModal();
 }
 
 /* ============ WIRING ============ */
@@ -919,13 +979,14 @@ Array.prototype.forEach.call(document.querySelectorAll(".tabs button"),function(
     b.classList.add("on");
     var w=b.getAttribute("data-tab");
     ["events","inc","mitre","audit"].forEach(function(t){byId("tab-"+t).style.display=(t===w)?"":"none";});
+    syncA11y();
   });
 });
 byId("btnDict").addEventListener("click",openDictamen);
-byId("btnClose").addEventListener("click",function(){byId("modal").style.display="none";});
+byId("btnClose").addEventListener("click",hideModal);
 byId("btnCopy").addEventListener("click",function(){
   var txt=byId("modalPre").textContent;
-  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt);}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt);byId("srStatus").textContent="Dictamen copiado al portapapeles.";}
 });
 byId("pvChip").addEventListener("click",function(){
   state.partner=!state.partner;
@@ -956,13 +1017,13 @@ byId("swAP").addEventListener("click",function(){
   auditAppend({op:"vista",scen:state.scen,ired:state.lastV?state.lastV.ired:0,exp:state.lastV?state.lastV.exp:0,refs:["exposicion_inherente:"+(state.rawView?"on":"off")]});
   paint();
 });
-Array.prototype.forEach.call(document.querySelectorAll(".sidebar a[data-go]"),function(a){
+Array.prototype.forEach.call(document.querySelectorAll(".sidebar .navbtn"),function(a){
   a.addEventListener("click",function(ev){
     ev.preventDefault();
-    Array.prototype.forEach.call(document.querySelectorAll(".sidebar a"),function(x){x.classList.remove("on");});
-    a.classList.add("on");
+    Array.prototype.forEach.call(document.querySelectorAll(".sidebar .navbtn"),function(x){x.classList.remove("on");x.removeAttribute("aria-current");});
+    a.classList.add("on");a.setAttribute("aria-current","true");
     var t=byId(a.getAttribute("data-go"));
-    if(t)t.scrollIntoView({behavior:"smooth"});
+    if(t){t.scrollIntoView({behavior:REDUCE?"auto":"smooth"});t.setAttribute("tabindex","-1");t.focus({preventScroll:true});}
   });
 });
 
